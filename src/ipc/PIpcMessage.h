@@ -92,6 +92,14 @@ class PIPC_API PIpcMessage : public Pickle {
       return (is_valid()) ? ((header_->flags & SUSPEND_BIT) != 0) : false;
   }
 
+  void set_fds() {
+      if (is_valid()) header_->flags |= FDS_BIT;
+  }
+
+  bool is_fds() const {
+      return (is_valid()) ? ((header_->flags & FDS_BIT) != 0) : false;
+  }
+
   uint16_t type() const {
     return is_valid() ? header_->type : 0;
   }
@@ -138,6 +146,22 @@ class PIPC_API PIpcMessage : public Pickle {
     return true;
   }
 
+  int32_t* fds() const { return fds_; }
+  uint32_t numFds() const { return header_->numFds; }
+
+  bool readFds(int32_t *fds, uint32_t *numFds) {
+    fds = fds_;
+    *numFds = header_->numFds;
+    return (fds_ != 0);
+  }
+
+  bool writeFds(int32_t* fds, uint32_t numFds) {
+   set_fds();
+   header_->numFds = numFds;
+    fds_ = fds;
+    return true;
+  }
+
  protected:
 
   virtual void reset() { 
@@ -154,7 +178,8 @@ class PIPC_API PIpcMessage : public Pickle {
     REPLY_ERROR_BIT = 0x0010,
     UNBLOCK_BIT     = 0x0020,
     DISCONNECT_BIT  = 0x0040,
-    SUSPEND_BIT     = 0x0080 // only valid for Synchronous messages, used to suspend the client process
+    SUSPEND_BIT     = 0x0080, // only valid for Synchronous messages, used to suspend the client process
+    FDS_BIT         = 0x0100
   };
 
   struct Header {
@@ -162,11 +187,15 @@ class PIPC_API PIpcMessage : public Pickle {
     uint16_t type;    // specifies the user-defined message type
     uint16_t flags;   // specifies control flags for the message
     uint32_t id;      // Id of this message
+    uint32_t numFds;
   };
   Header* header_;
 
   // Allow unit test to peek inside
   friend class PIpcMessageTest;
+
+private:
+  int32_t *fds_;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(PIpcMessage);

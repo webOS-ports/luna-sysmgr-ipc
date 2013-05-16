@@ -46,15 +46,18 @@ else
 FLAGS_OPT := -g -O3  -Wall -Werror -fno-exceptions -fno-rtti
 endif
 
-FLAGS_OPT += -fPIC -fvisibility=hidden
+FLAGS_OPT += -fPIC
 
 INCLUDES := $(INCLUDES) \
 	-I./src/base \
 	-I./src/ipc \
+	-I./3rdparty/libancillary-0.9.1 \
 	`pkg-config --cflags glib-2.0 gthread-2.0`
 
 LIBS := $(LIBS) \
 	`pkg-config --libs glib-2.0 gthread-2.0` \
+	-L./3rdparty/libancillary-0.9.1 \
+	-lancillary \
 	-lpthread
 
 LOCAL_CFLAGS := $(CFLAGS) $(FLAGS_OPT) -DQT_WEBOS
@@ -62,7 +65,12 @@ LOCAL_LFLAGS := $(LDFLAGS) $(FLAGS_OPT)
 
 # ------------------------------------------------------------------
 
-all: setup $(TARGET_OBJS) $(TARGET_SO)
+all: setup libancillary $(TARGET_OBJS) $(TARGET_SO)
+
+3rdparty/libancillary-0.9.1/libancillary.a:
+	@make -C 3rdparty/libancillary-0.9.1
+
+libancillary: 3rdparty/libancillary-0.9.1/libancillary.a
 
 setup:
 	@mkdir -p $(OBJDIR)
@@ -87,5 +95,6 @@ $(OBJDIR)/%.exe: %.cpp
 -include $(SOURCES:%.cpp=$(OBJDIR)/%.d)
 
 clean:
+	@make -C 3rdparty/libancillary-0.9.1 clean
 	rm -rf $(OBJDIR)
 

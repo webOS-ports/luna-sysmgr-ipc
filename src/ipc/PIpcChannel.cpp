@@ -39,6 +39,10 @@
 #include "PIpcSocketSource.h"
 #include "PIpcMessage.h"
 
+extern "C" {
+#include <ancillary.h>
+}
+
 PIpcChannel::PIpcChannel(GMainLoop* loop, int socketFd)
 	: m_mainLoop(loop)
 	, m_socketFd(socketFd)
@@ -417,6 +421,12 @@ bool PIpcChannel::processOneOutgoingMessage()
 
 	m_currOutgoingMessageInfo.m_payloadBytesHandled += bytesWritten;
 
+	// Sending file descriptors
+	if (msg->is_fds() && msg->fds()) {
+		if (ancil_send_fds(m_socketFd, msg->fds(), msg->numFds()) != 0)
+			return false;
+	}
+
 	// EAGAIN scenario
 	if (bytesWritten < bytesToWrite)
 		return false;
@@ -476,6 +486,13 @@ bool PIpcChannel::processIncomingMessages()
 	}
 
 	m_currIncomingMessageInfo.m_payloadBytesHandled += bytesRead;
+
+	// Receive possible file descriptors
+	if (m_incomingMessage->is_fds()) {
+		int32_t *fds = new int32_t[m_incomingMessage->numFds()];
+		if (ancil_recv_fds(m_socketFd, fds, m_incomingMessage->numFds()) != 0)
+			return false;
+	}
 
 	// EAGAIN scenario
 	if (!noError || (bytesRead < bytesToRead))
