@@ -1,46 +1,14 @@
-Summary
-=======
-This is the repository for LunaSysMgrIpc, the webOS IPC library used by luna-sysmgr.
+luna-sysmgr-ipc (PIpc)
+======================
 
-How to Build on Linux
-=====================
+**DEPRECATED — this library is no longer used by LuneOS.**
 
-### Building the latest "stable" version
+PIpc implemented the shared-memory/socket IPC between the retired
+LunaSysMgr UI and WebAppMgr. As of 2026 no component in the LuneOS
+stack includes a PIpc header or links this library; the remaining
+`DEPENDS`/`pkg_check_modules` references in luna-sysmgr-common,
+luna-appmanager and luna-displaymanager were build plumbing only and
+have been removed on their cleanup branches.
 
-Clone the repository openwebos/build-desktop and follow the instructions in the README file.
-
-### Building your local clone
-
-First follow the directions to build the latest "stable" version.
-
-To build your local clone of luna-sysmgr-ipc instead of the "stable" version installed with the build-webos-desktop script:  
-* Open the build-webos-desktop.sh script with a text editor
-* Locate the function build_luna-sysmgr-ipc
-* Change the line "cd $BASE/luna-sysmgr-ipc" to use the folder containing your clone, for example "cd ~/github/luna-sysmgr-ipc"
-* Close the text editor
-* Remove the file ~/luna-desktop-binaries/luna-sysmgr-ipc/luna-desktop-build.stamp
-* Start the build
-
-Cautions:
-* When you re-clone openwebos/build-desktop, you'll have to overwrite your changes and reapply them
-* Components often advance in parallel with each other, so be prepared to keep your cloned repositories updated
-* Fetch and rebase frequently
-
-# Copyright and License Information
-
-All content, including all source code files and documentation files in this repository except otherwise noted are: 
-
- Copyright (c) 2010-2012 Hewlett-Packard Development Company, L.P.
-
-All content, including all source code files and documentation files in this repository except otherwise noted are:
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this content except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Once the meta-webos-ports recipes drop `luna-sysmgr-ipc` from
+`DEPENDS`, the recipe and this repository can be archived.
